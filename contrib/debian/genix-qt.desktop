@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Stone Core
+Comment=stone P2P Cryptocurrency
+Comment[de]=Verbinde mit dem stone peer-to-peer Netzwerk
+Comment[fr]=stone, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=stone, eşten eşe kriptografik sanal para birimi
+Exec=stone-qt %u
+Terminal=false
+Type=Application
+Icon=stone128
+MimeType=x-scheme-handler/stone;
+Categories=Office;Finance;
