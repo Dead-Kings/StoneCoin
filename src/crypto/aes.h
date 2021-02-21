@@ -1,5 +1,4 @@
-// Copyright (c) 2015-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2018 The Stone Core developers
+// Copyright (c) 2015 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 //
@@ -23,7 +22,7 @@ private:
     AES128_ctx ctx;
 
 public:
-    explicit AES128Encrypt(const unsigned char key[16]);
+    AES128Encrypt(const unsigned char key[16]);
     ~AES128Encrypt();
     void Encrypt(unsigned char ciphertext[16], const unsigned char plaintext[16]) const;
 };
@@ -35,7 +34,7 @@ private:
     AES128_ctx ctx;
 
 public:
-    explicit AES128Decrypt(const unsigned char key[16]);
+    AES128Decrypt(const unsigned char key[16]);
     ~AES128Decrypt();
     void Decrypt(unsigned char plaintext[16], const unsigned char ciphertext[16]) const;
 };
@@ -47,7 +46,7 @@ private:
     AES256_ctx ctx;
 
 public:
-    explicit AES256Encrypt(const unsigned char key[32]);
+    AES256Encrypt(const unsigned char key[32]);
     ~AES256Encrypt();
     void Encrypt(unsigned char ciphertext[16], const unsigned char plaintext[16]) const;
 };
@@ -59,7 +58,7 @@ private:
     AES256_ctx ctx;
 
 public:
-    explicit AES256Decrypt(const unsigned char key[32]);
+    AES256Decrypt(const unsigned char key[32]);
     ~AES256Decrypt();
     void Decrypt(unsigned char plaintext[16], const unsigned char ciphertext[16]) const;
 };

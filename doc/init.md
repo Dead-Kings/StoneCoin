@@ -68,9 +68,9 @@ can then be controlled by group membership.
 3b) Mac OS X
 
 Binary:              `/usr/local/bin/stoned`  
-Configuration file:  `~/Library/Application Support/StoneCore/stone.conf`  
-Data directory:      `~/Library/Application Support/StoneCore`
-Lock file:           `~/Library/Application Support/StoneCore/.lock`
+Configuration file:  `~/Library/Application Support/stoneCore/stone.conf`  
+Data directory:      `~/Library/Application Support/stoneCore`
+Lock file:           `~/Library/Application Support/stoneCore/.lock`
 
 4. Installing Service Configuration
 -----------------------------------
@@ -104,7 +104,7 @@ use old versions of Upstart and do not supply the start-stop-daemon utility.
 Copy stoned.init to /etc/init.d/stoned. Test by running `service stoned start`.
 
 Using this script, you can adjust the path and flags to the stoned program by
-setting the STONED and FLAGS environment variables in the file
+setting the stoneD and FLAGS environment variables in the file
 /etc/sysconfig/stoned. You can also use the DAEMONOPTS environment variable here.
 
 4e) Mac OS X

@@ -1,13 +1,15 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
+// Copyright (c) 2014-2017 The Stone Core developers
 // Copyright (c) 2017 The Raven Core developers
-// Copyright (c) 2017-2018 The Stone Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_HASH_H
-#define BITCOIN_HASH_H
+#ifndef stone_HASH_H
+#define stone_HASH_H
+
 #include <iostream>
+#include <chrono>
 #include "crypto/ripemd160.h"
 #include "crypto/sha256.h"
 #include "prevector.h"
@@ -33,10 +35,10 @@
 extern "C" {
 #include "crypto/sph_sha2.h"
 }
+
 #include <vector>
 
 typedef uint256 ChainCode;
-
 #ifdef GLOBALDEFINED
 #define GLOBAL
 #else
@@ -54,7 +56,11 @@ GLOBAL sph_cubehash512_context  z_cubehash;
 GLOBAL sph_shavite512_context   z_shavite;
 GLOBAL sph_simd512_context      z_simd;
 GLOBAL sph_echo512_context      z_echo;
-
+GLOBAL sph_hamsi512_context      z_hamsi;
+GLOBAL sph_fugue512_context      z_fugue;
+GLOBAL sph_shabal512_context      z_shabal;
+GLOBAL sph_whirlpool_context      z_whirlpool;
+GLOBAL sph_sha512_context      z_sha;
 #define fillz() do { \
     sph_blake512_init(&z_blake); \
     sph_bmw512_init(&z_bmw); \
@@ -67,17 +73,20 @@ GLOBAL sph_echo512_context      z_echo;
     sph_shavite512_init(&z_shavite); \
     sph_simd512_init(&z_simd); \
     sph_echo512_init(&z_echo); \
+    sph_hamsi512_init(&z_hamsi); \
+    sph_fugue512_init(&z_fugue); \
+    sph_shabal512_init(&z_shabal); \
+    sph_whirlpool_init(&z_whirlpool; \
+    sph_sha512_init(&z_sha); \
 } while (0)
-
 #define ZBLAKE (memcpy(&ctx_blake, &z_blake, sizeof(z_blake)))
 #define ZBMW (memcpy(&ctx_bmw, &z_bmw, sizeof(z_bmw)))
 #define ZGROESTL (memcpy(&ctx_groestl, &z_groestl, sizeof(z_groestl)))
 #define ZJH (memcpy(&ctx_jh, &z_jh, sizeof(z_jh)))
 #define ZKECCAK (memcpy(&ctx_keccak, &z_keccak, sizeof(z_keccak)))
 #define ZSKEIN (memcpy(&ctx_skein, &z_skein, sizeof(z_skein)))
-
-/* ----------- Bitcoin Hash ------------------------------------------------- */
-/** A hasher class for Bitcoin's 256-bit hash (double SHA-256). */
+/* ----------- stone Hash ------------------------------------------------- */
+/** A hasher class for stone's 256-bit hash (double SHA-256). */
 class CHash256 {
 private:
     CSHA256 sha;
@@ -85,9 +94,9 @@ public:
     static const size_t OUTPUT_SIZE = CSHA256::OUTPUT_SIZE;
 
     void Finalize(unsigned char hash[OUTPUT_SIZE]) {
-        unsigned char buf[sha.OUTPUT_SIZE];
+        unsigned char buf[CSHA256::OUTPUT_SIZE];
         sha.Finalize(buf);
-        sha.Reset().Write(buf, sha.OUTPUT_SIZE).Finalize(hash);
+        sha.Reset().Write(buf, CSHA256::OUTPUT_SIZE).Finalize(hash);
     }
 
     CHash256& Write(const unsigned char *data, size_t len) {
@@ -101,7 +110,7 @@ public:
     }
 };
 
-/** A hasher class for Bitcoin's 160-bit hash (SHA-256 + RIPEMD-160). */
+/** A hasher class for stone's 160-bit hash (SHA-256 + RIPEMD-160). */
 class CHash160 {
 private:
     CSHA256 sha;
@@ -109,9 +118,9 @@ public:
     static const size_t OUTPUT_SIZE = CRIPEMD160::OUTPUT_SIZE;
 
     void Finalize(unsigned char hash[OUTPUT_SIZE]) {
-        unsigned char buf[sha.OUTPUT_SIZE];
+        unsigned char buf[CSHA256::OUTPUT_SIZE];
         sha.Finalize(buf);
-        CRIPEMD160().Write(buf, sha.OUTPUT_SIZE).Finalize(hash);
+        CRIPEMD160().Write(buf, CSHA256::OUTPUT_SIZE).Finalize(hash);
     }
 
     CHash160& Write(const unsigned char *data, size_t len) {
@@ -246,17 +255,17 @@ class CHashWriter
 private:
     CHash256 ctx;
 
+    const int nType;
+    const int nVersion;
 public:
-    int nType;
-    int nVersion;
 
     CHashWriter(int nTypeIn, int nVersionIn) : nType(nTypeIn), nVersion(nVersionIn) {}
 
     int GetType() const { return nType; }
     int GetVersion() const { return nVersion; }
-    CHashWriter& write(const char *pch, size_t size) {
+
+    void write(const char *pch, size_t size) {
         ctx.Write((const unsigned char*)pch, size);
-        return (*this);
     }
 
     // invalidates the object
@@ -269,7 +278,8 @@ public:
     template<typename T>
     CHashWriter& operator<<(const T& obj) {
         // Serialize to this stream
-        ::Serialize(*this, obj, nType, nVersion);
+        ::Serialize(*this, obj);
+        // ::Serialize(*this, obj, nType, nVersion);
         return (*this);
     }
 };
@@ -282,7 +292,7 @@ private:
     Source* source;
 
 public:
-    explicit CHashVerifier(Source* source_) : CHashWriter(source_->GetType(), source_->GetVersion()), source(source_) {}
+    CHashVerifier(Source* source_) : CHashWriter(source_->GetType(), source_->GetVersion()), source(source_) {}
 
     void read(char* pch, size_t nSize)
     {
@@ -305,6 +315,7 @@ public:
     {
         // Unserialize from this stream
         ::Unserialize(*this, obj);
+        // ::Unserialize(*this, obj, nType, nVersion);
         return (*this);
     }
 };
@@ -369,7 +380,7 @@ inline int GetHashSelection(const uint256 PrevBlockHash, int index) {
 extern double algoHashTotal[16];
 extern int algoHashHits[16];
 
-
+/* ----------- X16r Hash ------------------------------------------------ */
 template<typename T1>
 inline uint256 HashX16R(const T1 pbegin, const T1 pend, const uint256 PrevBlockHash)
 {
@@ -498,4 +509,4 @@ inline uint256 HashX16R(const T1 pbegin, const T1 pend, const uint256 PrevBlockH
     return hash[15].trim256();
 }
 
-#endif // BITCOIN_HASH_H
+#endif // stone_HASH_H

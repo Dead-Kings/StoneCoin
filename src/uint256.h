@@ -1,7 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2017-2018 The Stone Core developers
+// Copyright (c) 2014-2019 The Stone Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -80,11 +79,6 @@ public:
         return sizeof(data);
     }
 
-    unsigned int GetSerializeSize(int nType, int nVersion) const
-    {
-        return sizeof(data);
-    }
-
     uint64_t GetUint64(int pos) const
     {
         const uint8_t* ptr = data + pos * 8;
@@ -99,13 +93,13 @@ public:
     }
 
     template<typename Stream>
-    void Serialize(Stream& s, int nType, int nVersion) const
+    void Serialize(Stream& s) const
     {
         s.write((char*)data, sizeof(data));
     }
 
     template<typename Stream>
-    void Unserialize(Stream& s, int nType, int nVersion)
+    void Unserialize(Stream& s)
     {
         s.read((char*)data, sizeof(data));
     }
@@ -140,6 +134,7 @@ public:
             return(data[index / 2] >> 4);
         return(data[index / 2] & 0x0F); 
     }
+
     /** A cheap hash function that just returns 64 bits from the result, it can be
      * used when the contents are considered uniformly random. It is not appropriate
      * when the value can easily be influenced from outside as e.g. a network adversary could
@@ -149,11 +144,6 @@ public:
     {
         return ReadLE64(data);
     }
-
-    /** A more secure, salted hash function.
-     * @note This hash is not stable between little and big endian.
-     */
-    uint64_t GetHash(const uint256& salt) const;
 };
 
 /* uint256 from const char *.
@@ -192,5 +182,15 @@ public:
     }
 };
 
+namespace std {
+    template <>
+    struct hash<uint256>
+    {
+        std::size_t operator()(const uint256& k) const
+        {
+            return (std::size_t)k.GetCheapHash();
+        }
+    };
+}
 
 #endif // BITCOIN_UINT256_H

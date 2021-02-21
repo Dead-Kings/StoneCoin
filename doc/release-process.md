@@ -1,200 +1,276 @@
 Release Process
 ====================
 
-* Update translations, see [translation_process.md](https://github.com/stone/stone/blob/master/doc/translation_process.md#syncing-with-transifex)
-* Update hardcoded [seeds](/contrib/seeds)
+* Update translations, see [translation_process.md](https://github.com/stone-project/stone/blob/master/doc/translation_process.md#synchronising-translations).
 
-* * *
+* Update manpages, see [gen-manpages.sh](https://github.com/stone-project/stone/blob/master/contrib/devtools/README.md#gen-manpagessh).
 
-###First time / New builders
+Before every minor and major release:
+
+* Update [bips.md](bips.md) to account for changes since the last release.
+* Update version in `configure.ac` (don't forget to set `CLIENT_VERSION_IS_RELEASE` to `true`)
+* Write release notes (see below)
+* Update `src/chainparams.cpp` nMinimumChainWork with information from the getblockchaininfo rpc.
+* Update `src/chainparams.cpp` defaultAssumeValid  with information from the getblockhash rpc.
+  - The selected value must not be orphaned so it may be useful to set the value two blocks back from the tip.
+  - Testnet should be set some tens of thousands back from the tip due to reorgs there.
+  - This update should be reviewed with a reindex-chainstate with assumevalid=0 to catch any defect
+     that causes rejection of blocks in the past history.
+
+Before every major release:
+
+* Update hardcoded [seeds](/contrib/seeds/README.md). TODO: Give example PR for stone
+* Update [`BLOCK_CHAIN_SIZE`](/src/qt/intro.cpp) to the current size plus some overhead.
+* Update `src/chainparams.cpp` chainTxData with statistics about the transaction count and rate.
+* Update version of `contrib/gitian-descriptors/*.yml`: usually one'd want to do this on master after branching off the release - but be sure to at least do it before a new major release
+
+### First time / New builders
+
+If you're using the automated script (found in [contrib/gitian-build.py](/contrib/gitian-build.py)), then at this point you should run it with the "--setup" command. Otherwise ignore this.
+
 Check out the source code in the following directory hierarchy.
 
 	cd /path/to/your/toplevel/build
-	git clone https://github.com/stone/gitian.sigs.git
-	git clone https://github.com/stone/stone-detached-sigs.git
+	git clone https://github.com/stone-project/gitian.sigs.git
+	git clone https://github.com/stone-project/stone-detached-sigs.git
 	git clone https://github.com/devrandom/gitian-builder.git
-	git clone https://github.com/stone/stone.git
+	git clone https://github.com/stone-project/stone.git
 
-###Stone Core maintainers/release engineers, update (commit) version in sources
+### Stone Core maintainers/release engineers, suggestion for writing release notes
 
-	pushd ./stone
-	contrib/verifysfbinaries/verify.sh
-	configure.ac
-	doc/README*
-	doc/Doxyfile
-	contrib/gitian-descriptors/*.yml
-	src/clientversion.h (change CLIENT_VERSION_IS_RELEASE to true)
+Write release notes. git shortlog helps a lot, for example:
 
-	# tag version in git
+    git shortlog --no-merges v(current version, e.g. 0.12.2)..v(new version, e.g. 0.12.3)
 
-	git tag -s v(new version, e.g. 0.8.0)
+Generate list of authors:
 
-	# write release notes. git shortlog helps a lot, for example:
+    git log --format='%aN' "$*" | sort -ui | sed -e 's/^/- /'
 
-	git shortlog --no-merges v(current version, e.g. 0.7.2)..v(new version, e.g. 0.8.0)
-	popd
+Tag version (or release candidate) in git
 
-* * *
+    git tag -s v(new version, e.g. 0.12.3)
 
-###Setup and perform Gitian builds
+### Setup and perform Gitian builds
 
- Setup Gitian descriptors:
+If you're using the automated script (found in [contrib/gitian-build.py](/contrib/gitian-build.py)), then at this point you should run it with the "--build" command. Otherwise ignore this.
 
-	pushd ./stone
-	export SIGNER=(your Gitian key, ie bluematt, sipa, etc)
-	export VERSION=(new version, e.g. 0.8.0)
-	git fetch
-	git checkout v${VERSION}
-	popd
+Setup Gitian descriptors:
 
-  Ensure your gitian.sigs are up-to-date if you wish to gverify your builds against other Gitian signatures.
+    pushd ./stone
+    export SIGNER=(your Gitian key, ie bluematt, sipa, etc)
+    export VERSION=(new version, e.g. 0.12.3)
+    git fetch
+    git checkout v${VERSION}
+    popd
 
-	pushd ./gitian.sigs
-	git pull
-	popd
+Ensure your gitian.sigs are up-to-date if you wish to gverify your builds against other Gitian signatures.
 
-  Ensure gitian-builder is up-to-date to take advantage of new caching features (`e9741525c` or later is recommended).
+    pushd ./gitian.sigs
+    git pull
+    popd
 
-	pushd ./gitian-builder
-	git pull
+Ensure gitian-builder is up-to-date:
 
-###Fetch and create inputs: (first time, or when dependency versions change)
+    pushd ./gitian-builder
+    git pull
+    popd
 
-	mkdir -p inputs
-	wget -P inputs https://bitcoincore.org/cfields/osslsigncode-Backports-to-1.7.1.patch
-	wget -P inputs http://downloads.sourceforge.net/project/osslsigncode/osslsigncode/osslsigncode-1.7.1.tar.gz
 
- Register and download the Apple SDK: see [OS X readme](README_osx.txt) for details.
+### Fetch and create inputs: (first time, or when dependency versions change)
 
- https://developer.apple.com/devcenter/download.action?path=/Developer_Tools/xcode_6.1.1/xcode_6.1.1.dmg
+    pushd ./gitian-builder
+    mkdir -p inputs
+    wget -O inputs/osslsigncode-2.0.tar.gz https://github.com/mtrojnar/osslsigncode/archive/2.0.tar.gz
+    echo '5a60e0a4b3e0b4d655317b2f12a810211c50242138322b16e7e01c6fbb89d92f inputs/osslsigncode-2.0.tar.gz' | sha256sum -c
+    popd
 
- Using a Mac, create a tarball for the 10.9 SDK and copy it to the inputs directory:
+Create the OS X SDK tarball, see the [OS X readme](README_osx.md) for details, and copy it into the inputs directory.
 
-	tar -C /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/ -czf MacOSX10.9.sdk.tar.gz MacOSX10.9.sdk
-
-###Optional: Seed the Gitian sources cache and offline git repositories
+### Optional: Seed the Gitian sources cache and offline git repositories
 
 By default, Gitian will fetch source files as needed. To cache them ahead of time:
 
-	make -C ../stone/depends download SOURCES_PATH=`pwd`/cache/common
+    pushd ./gitian-builder
+    make -C ../stone/depends download SOURCES_PATH=`pwd`/cache/common
+    popd
 
 Only missing files will be fetched, so this is safe to re-run for each build.
 
 NOTE: Offline builds must use the --url flag to ensure Gitian fetches only from local URLs. For example:
-```
-./bin/gbuild --url stone=/path/to/stone,signature=/path/to/sigs {rest of arguments}
-```
+
+    pushd ./gitian-builder
+    ./bin/gbuild --url stone=/path/to/stone,signature=/path/to/sigs {rest of arguments}
+    popd
+
 The gbuild invocations below <b>DO NOT DO THIS</b> by default.
 
-###Build and sign Stone Core for Linux, Windows, and OS X:
+### Build and sign Stone Core for Linux, Windows, and OS X:
 
-	./bin/gbuild --commit stone=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-linux.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-linux.yml
-	mv build/out/stone-*.tar.gz build/out/src/stone-*.tar.gz ../
+    pushd ./gitian-builder
+    ./bin/gbuild --num-make 2 --memory 3000 --commit stone=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-linux.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-linux.yml
+    mv build/out/stone-*.tar.gz build/out/src/stone-*.tar.gz ../
 
-	./bin/gbuild --commit stone=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-win.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-win.yml
-	mv build/out/stone-*-win-unsigned.tar.gz inputs/stone-win-unsigned.tar.gz
-	mv build/out/stone-*.zip build/out/stone-*.exe ../
+    ./bin/gbuild --num-make 2 --memory 3000 --commit stone=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-win.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-win.yml
+    mv build/out/stone-*-win-unsigned.tar.gz inputs/stone-win-unsigned.tar.gz
+    mv build/out/stone-*.zip build/out/stone-*.exe ../
 
-	./bin/gbuild --commit stone=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-osx.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-osx.yml
-	mv build/out/stone-*-osx-unsigned.tar.gz inputs/stone-osx-unsigned.tar.gz
-	mv build/out/stone-*.tar.gz build/out/stone-*.dmg ../
-	popd
+    ./bin/gbuild --num-make 2 --memory 3000 --commit stone=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-osx.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-osx.yml
+    mv build/out/stone-*-osx-unsigned.tar.gz inputs/stone-osx-unsigned.tar.gz
+    mv build/out/stone-*.tar.gz build/out/stone-*.dmg ../
+    popd
 
-  Build output expected:
+Build output expected:
 
-  1. source tarball (stone-${VERSION}.tar.gz)
-  2. linux 32-bit and 64-bit dist tarballs (stone-${VERSION}-linux[32|64].tar.gz)
-  3. windows 32-bit and 64-bit unsigned installers and dist zips (stone-${VERSION}-win[32|64]-setup-unsigned.exe, stone-${VERSION}-win[32|64].zip)
-  4. OS X unsigned installer and dist tarball (stone-${VERSION}-osx-unsigned.dmg, stone-${VERSION}-osx64.tar.gz)
-  5. Gitian signatures (in gitian.sigs/${VERSION}-<linux|{win,osx}-unsigned>/(your Gitian key)/
+  1. source tarball (`stone-${VERSION}.tar.gz`)
+  2. linux 32-bit and 64-bit dist tarballs (`stone-${VERSION}-linux[32|64].tar.gz`)
+  3. windows 32-bit and 64-bit unsigned installers and dist zips (`stone-${VERSION}-win[32|64]-setup-unsigned.exe`, `stone-${VERSION}-win[32|64].zip`)
+  4. OS X unsigned installer and dist tarball (`stone-${VERSION}-osx-unsigned.dmg`, `stone-${VERSION}-osx64.tar.gz`)
+  5. Gitian signatures (in `gitian.sigs/${VERSION}-<linux|{win,osx}-unsigned>/(your Gitian key)/`)
 
-###Verify other gitian builders signatures to your own. (Optional)
+### Verify other gitian builders signatures to your own. (Optional)
 
-  Add other gitian builders keys to your gpg keyring
+Add other gitian builders keys to your gpg keyring, and/or refresh keys.
 
-	gpg --import ../stone/contrib/gitian-downloader/*.pgp
+    gpg --import stone/contrib/gitian-keys/*.pgp
+    gpg --refresh-keys
 
-  Verify the signatures
+Verify the signatures
 
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../stone/contrib/gitian-descriptors/gitian-linux.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../stone/contrib/gitian-descriptors/gitian-win.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../stone/contrib/gitian-descriptors/gitian-osx.yml
+    pushd ./gitian-builder
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../stone/contrib/gitian-descriptors/gitian-linux.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../stone/contrib/gitian-descriptors/gitian-win.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../stone/contrib/gitian-descriptors/gitian-osx.yml
+    popd
 
-	popd
-
-###Next steps:
+### Next steps:
 
 Commit your signature to gitian.sigs:
 
-	pushd gitian.sigs
-	git add ${VERSION}-linux/${SIGNER}
-	git add ${VERSION}-win-unsigned/${SIGNER}
-	git add ${VERSION}-osx-unsigned/${SIGNER}
-	git commit -a
-	git push  # Assuming you can push to the gitian.sigs tree
-	popd
+    pushd gitian.sigs
+    git add ${VERSION}-linux/${SIGNER}
+    git add ${VERSION}-win-unsigned/${SIGNER}
+    git add ${VERSION}-osx-unsigned/${SIGNER}
+    git commit -a
+    git push  # Assuming you can push to the gitian.sigs tree
+    popd
 
-  Wait for Windows/OS X detached signatures:
-	Once the Windows/OS X builds each have 3 matching signatures, they will be signed with their respective release keys.
-	Detached signatures will then be committed to the [stone-detached-sigs](https://github.com/stone/stone-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
+Codesigner only: Create Windows/OS X detached signatures:
+- Only one person handles codesigning. Everyone else should skip to the next step.
+- Only once the Windows/OS X builds each have 3 matching signatures may they be signed with their respective release keys.
 
-  Create (and optionally verify) the signed OS X binary:
+Codesigner only: Sign the osx binary:
 
-	pushd ./gitian-builder
-	./bin/gbuild -i --commit signature=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-osx-signer.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-osx-signer.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../stone/contrib/gitian-descriptors/gitian-osx-signer.yml
-	mv build/out/stone-osx-signed.dmg ../stone-${VERSION}-osx.dmg
-	popd
+    transfer stonecore-osx-unsigned.tar.gz to osx for signing
+    tar xf stonecore-osx-unsigned.tar.gz
+    ./detached-sig-create.sh -s "Key ID" -o runtime
+    Enter the keychain password and authorize the signature
+    Move signature-osx.tar.gz back to the gitian host
 
-  Create (and optionally verify) the signed Windows binaries:
+Codesigner only: Sign the windows binaries:
 
-	pushd ./gitian-builder
-	./bin/gbuild -i --commit signature=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-win-signer.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-win-signer.yml
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-signed ../stone/contrib/gitian-descriptors/gitian-win-signer.yml
-	mv build/out/stone-*win64-setup.exe ../stone-${VERSION}-win64-setup.exe
-	mv build/out/stone-*win32-setup.exe ../stone-${VERSION}-win32-setup.exe
-	popd
+    tar xf stonecore-win-unsigned.tar.gz
+    ./detached-sig-create.sh -key /path/to/codesign.key
+    Enter the passphrase for the key when prompted
+    signature-win.tar.gz will be created
+
+Codesigner only: Commit the detached codesign payloads:
+
+    cd ~/stonecore-detached-sigs
+    checkout the appropriate branch for this release series
+    rm -rf *
+    tar xf signature-osx.tar.gz
+    tar xf signature-win.tar.gz
+    git add -a
+    git commit -m "point to ${VERSION}"
+    git tag -s v${VERSION} HEAD
+    git push the current branch and new tag
+
+Non-codesigners: wait for Windows/OS X detached signatures:
+
+- Once the Windows/OS X builds each have 3 matching signatures, they will be signed with their respective release keys.
+- Detached signatures will then be committed to the [stone-detached-sigs](https://github.com/stone-project/stone-detached-sigs) repository, which can be combined with the unsigned apps to create signed binaries.
+
+Create (and optionally verify) the signed OS X binary:
+
+    pushd ./gitian-builder
+    ./bin/gbuild -i --commit signature=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-osx-signer.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-osx-signer.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../stone/contrib/gitian-descriptors/gitian-osx-signer.yml
+    mv build/out/stone-osx-signed.dmg ../stone-${VERSION}-osx.dmg
+    popd
+
+Create (and optionally verify) the signed Windows binaries:
+
+    pushd ./gitian-builder
+    ./bin/gbuild -i --commit signature=v${VERSION} ../stone/contrib/gitian-descriptors/gitian-win-signer.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../stone/contrib/gitian-descriptors/gitian-win-signer.yml
+    ./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-signed ../stone/contrib/gitian-descriptors/gitian-win-signer.yml
+    mv build/out/stone-*win64-setup.exe ../stone-${VERSION}-win64-setup.exe
+    mv build/out/stone-*win32-setup.exe ../stone-${VERSION}-win32-setup.exe
+    popd
 
 Commit your signature for the signed OS X/Windows binaries:
 
-	pushd gitian.sigs
-	git add ${VERSION}-osx-signed/${SIGNER}
-	git add ${VERSION}-win-signed/${SIGNER}
-	git commit -a
-	git push  # Assuming you can push to the gitian.sigs tree
-	popd
-
--------------------------------------------------------------------------
+    pushd gitian.sigs
+    git add ${VERSION}-osx-signed/${SIGNER}
+    git add ${VERSION}-win-signed/${SIGNER}
+    git commit -a
+    git push  # Assuming you can push to the gitian.sigs tree
+    popd
 
 ### After 3 or more people have gitian-built and their results match:
 
 - Create `SHA256SUMS.asc` for the builds, and GPG-sign it:
+
 ```bash
 sha256sum * > SHA256SUMS
+```
+
+The list of files should be:
+```
+stone-${VERSION}-aarch64-linux-gnu.tar.gz
+stone-${VERSION}-arm-linux-gnueabihf.tar.gz
+stone-${VERSION}-i686-pc-linux-gnu.tar.gz
+stone-${VERSION}-x86_64-linux-gnu.tar.gz
+stone-${VERSION}-osx64.tar.gz
+stone-${VERSION}-osx.dmg
+stone-${VERSION}.tar.gz
+stone-${VERSION}-win32-setup.exe
+stone-${VERSION}-win32.zip
+stone-${VERSION}-win64-setup.exe
+stone-${VERSION}-win64.zip
+```
+The `*-debug*` files generated by the gitian build contain debug symbols
+for troubleshooting by developers. It is assumed that anyone that is interested
+in debugging can run gitian to generate the files for themselves. To avoid
+end-user confusion about which file to pick, as well as save storage
+space *do not upload these to the stone.cx server*.
+
+- GPG-sign it, delete the unsigned file:
+```
 gpg --digest-algo sha256 --clearsign SHA256SUMS # outputs SHA256SUMS.asc
 rm SHA256SUMS
 ```
 (the digest algorithm is forced to sha256 to avoid confusion of the `Hash:` header that GPG adds with the SHA256 used for the files)
 Note: check that SHA256SUMS itself doesn't end up in SHA256SUMS, which is a spurious/nonsensical entry.
 
-- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the stone.info server
+- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the stone.cx server
 
-- Update stone.info
+- Update stone.cx
 
 - Announce the release:
-  - Proton-development mailing list
 
-  - Update title of #stone on Freenode IRC
+  - Release on stone forum: https://www.stone.cx/forum/topic/official-announcements.54/
 
-  - Optionally reddit /r/Protonpay, ... but this will usually sort out itself
+  - Optionally Discord, twitter, reddit /r/stone-project, ... but this will usually sort out itself
 
-- Notify flare so that he can start building [the PPAs](https://launchpad.net/~stone.info/+archive/ubuntu/stone)
+  - Notify flare so that he can start building [the PPAs](https://launchpad.net/~stone.cx/+archive/ubuntu/stone)
 
-- Add release notes for the new version to the directory `doc/release-notes` in git master
+  - Archive release notes for the new version to `doc/release-notes/` (branch `master` and branch of the release)
 
-- Celebrate
+  - Create a [new GitHub release](https://github.com/stone-project/stone/releases/new) with a link to the archived release notes.
+
+  - Celebrate

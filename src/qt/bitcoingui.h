@@ -19,10 +19,9 @@
 #include <QPushButton>
 #include <QSystemTrayIcon>
 
-
-#include <QString>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
+#ifdef Q_OS_MAC
+#include <qt/macos_appnap.h>
+#endif
 
 class ClientModel;
 class NetworkStyle;
@@ -35,9 +34,7 @@ class UnitDisplayStatusBarControl;
 class WalletFrame;
 class WalletModel;
 class HelpMessageDialog;
-class MasternodeList;
-
-class CWallet;
+class ModalOverlay;
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -89,8 +86,9 @@ private:
     WalletFrame *walletFrame;
 
     UnitDisplayStatusBarControl *unitDisplayControl;
-    QLabel *labelEncryptionIcon;
-    QPushButton *labelConnectionsIcon;
+    QLabel *labelWalletEncryptionIcon;
+    QLabel *labelWalletHDStatusIcon;
+    QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;
     QProgressBar *progressBar;
@@ -124,14 +122,10 @@ private:
     QAction *openPeersAction;
     QAction *openRepairAction;
     QAction *openConfEditorAction;
-    QAction *openMNConfEditorAction;
     QAction *showBackupsAction;
     QAction *openAction;
     QAction *showHelpMessageAction;
     QAction *showPrivateSendHelpAction;
-    QAction *forceCheckupdate;
-    bool updateCalledFromMenu;
-    
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -139,15 +133,28 @@ private:
     Notificator *notificator;
     RPCConsole *rpcConsole;
     HelpMessageDialog *helpMessageDialog;
+    ModalOverlay *modalOverlay;
+
+#ifdef Q_OS_MAC
+    CAppNapInhibitor* m_app_nap_inhibitor = nullptr;
+#endif
 
     /** Keep track of previous number of blocks, to detect progress */
     int prevBlocks;
     int spinnerFrame;
 
-    QNetworkAccessManager manager;
-    QString target;
-
     const PlatformStyle *platformStyle;
+
+    struct IncomingTransactionMessage {
+        QString date;
+        int unit;
+        CAmount amount;
+        QString type;
+        QString address;
+        QString label;
+    };
+    std::list<IncomingTransactionMessage> incomingTransactions;
+    QTimer* incomingTransactionsTimer;
 
     /** Create the main UI actions. */
     void createActions();
@@ -168,6 +175,11 @@ private:
     /** Disconnect core signals from GUI client */
     void unsubscribeFromCoreSignals();
 
+    /** Update UI with latest network info from model. */
+    void updateNetworkState();
+
+    void updateHeadersSyncProgressLabel();
+
 Q_SIGNALS:
     /** Signal raised when a URI was entered or dragged to the GUI */
     void receivedURI(const QString &uri);
@@ -177,10 +189,12 @@ Q_SIGNALS:
 public Q_SLOTS:
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
+    /** Set network state shown in the UI */
+    void setNetworkActive(bool networkActive);
     /** Get restart command-line parameters and request restart */
     void handleRestart(QStringList args);
     /** Set number of blocks and last block date shown in the UI */
-    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress);
+    void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Set additional data sync status shown in the UI */
     void setAdditionalDataSyncProgress(double nSyncProgress);
 
@@ -191,9 +205,15 @@ public Q_SLOTS:
                             @see CClientUIInterface::MessageBoxFlags
        @param[in] ret       pointer to a bool that will be modified to whether Ok was clicked (modal only)
     */
-    void message(const QString &title, const QString &message, unsigned int style, bool *ret = NULL);
+    void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
 
 #ifdef ENABLE_WALLET
+    /** Set the hd-enabled status as shown in the UI.
+     @param[in] status            current hd enabled status
+     @see WalletModel::EncryptionStatus
+     */
+    void setHDStatus(int hdEnabled);
+
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status
        @see WalletModel::EncryptionStatus
@@ -204,6 +224,7 @@ public Q_SLOTS:
 
     /** Show incoming transaction notification for new transactions. */
     void incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label);
+    void showIncomingTransactions();
 #endif // ENABLE_WALLET
 
 private Q_SLOTS:
@@ -243,8 +264,6 @@ private Q_SLOTS:
 
     /** Open external (default) editor with stone.conf */
     void showConfEditor();
-    /** Open external (default) editor with masternode.conf */
-    void showMNConfEditor();
     /** Show folder with wallet backups in default file browser */
     void showBackups();
 
@@ -262,22 +281,19 @@ private Q_SLOTS:
     /** Simply calls showNormalIfMinimized(true) for use in SLOT() macro */
     void toggleHidden();
 
-    /** called by a timer to check if any updates exist on server **/
-    bool detectUpdate();
-    bool detectUpdateMenuCalled();
-
-    void downloadFinished(QNetworkReply *data);
-    void updateCheckFinished(QNetworkReply *data);
-
-    void downloadProgress(qint64 recieved, qint64 total);
-
-    void messageUpdate(const QString &title, const QString &message, unsigned int style, bool *ret);
-
-     /** called by a timer to check if fRequestShutdown has been set **/
+    /** called by a timer to check if fRequestShutdown has been set **/
     void detectShutdown();
 
     /** Show progress dialog e.g. for verifychain */
     void showProgress(const QString &title, int nProgress);
+    
+    /** When hideTrayIcon setting is changed in OptionsModel hide or show the icon accordingly. */
+    void setTrayIconVisible(bool);
+
+    /** Toggle networking */
+    void toggleNetworkActive();
+
+    void showModalOverlay();
 };
 
 class UnitDisplayStatusBarControl : public QLabel

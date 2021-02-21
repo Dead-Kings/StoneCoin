@@ -26,13 +26,16 @@
       <bool>false</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop:0 #F0D0A0, stop:1 #F8D488); color:#000000;</string>
+      <string notr="true">QLabel { background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop:0 #F0D0A0, stop:1 #F8D488); color:#000000; }</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
      </property>
      <property name="margin">
       <number>3</number>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>
@@ -67,10 +70,7 @@
             <item>
              <widget class="QLabel" name="labelWalletStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Stone network after a connection is established, but this process has not completed yet.</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel { color: red; }</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the stone network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string notr="true">(out of sync)</string>
@@ -422,10 +422,7 @@
             <item>
              <widget class="QLabel" name="labelPrivateSendSyncStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Stone network after a connection is established, but this process has not completed yet.</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel { color: red; }</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the stone network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string notr="true">(out of sync)</string>
@@ -511,7 +508,7 @@
                </font>
               </property>
               <property name="text">
-               <string notr="true">0 STONE</string>
+               <string notr="true">0 stone</string>
               </property>
              </widget>
             </item>
@@ -525,7 +522,7 @@
             <item row="3" column="1">
              <widget class="QLabel" name="labelAmountRounds">
               <property name="text">
-               <string>0 STONE / 0 Rounds</string>
+               <string>0 stone / 0 Rounds</string>
               </property>
              </widget>
             </item>
@@ -576,61 +573,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_debugbuttons">
-              <item>
-               <widget class="QPushButton" name="privateSendAuto">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>Try to manually submit a PrivateSend request.</string>
-                </property>
-                <property name="text">
-                 <string>Try Mix</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="privateSendReset">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>Reset the current status of PrivateSend (can interrupt PrivateSend if it's in the process of Mixing, which can cost you money!)</string>
-                </property>
-                <property name="autoFillBackground">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>Reset</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="privateSendInfo">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>Information about PrivateSend and Mixing</string>
-                </property>
-                <property name="text">
-                 <string>Info</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
            </layout>
           </item>
          </layout>
@@ -680,10 +622,7 @@
             <item>
              <widget class="QLabel" name="labelTransactionsStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Stone network after a connection is established, but this process has not completed yet.</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel { color: red; }</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the stone network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string notr="true">(out of sync)</string>

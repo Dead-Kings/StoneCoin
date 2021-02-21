@@ -277,7 +277,7 @@ if test "x$ax_pthread_clang" = "xyes"; then
         # compilation (CFLAGS) are also used in linking.  Many systems
         # supported by AX_PTHREAD require exactly this for POSIX threads
         # support, and in fact it is often not straightforward to specify a
-        # flag that is used only in the compilation stone and not in
+        # flag that is used only in the compilation phase and not in
         # linking.  Such a scenario is extremely rare in practice.
         #
         # Even though use of the -pthread flag in linking would only print

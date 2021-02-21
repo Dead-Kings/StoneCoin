@@ -5,7 +5,7 @@
 #include "bitcoinamountfield.h"
 
 #include "bitcoinunits.h"
-#include "guiconstants.h"
+#include "guiutil.h"
 #include "qvaluecombobox.h"
 
 #include <QApplication>
@@ -24,7 +24,7 @@ class AmountSpinBox: public QAbstractSpinBox
 public:
     explicit AmountSpinBox(QWidget *parent):
         QAbstractSpinBox(parent),
-        currentUnit(BitcoinUnits::STONE),
+        currentUnit(BitcoinUnits::stone),
         singleStep(100000) // satoshis
     {
         setAlignment(Qt::AlignRight);
@@ -99,7 +99,7 @@ public:
 
             const QFontMetrics fm(fontMetrics());
             int h = lineEdit()->minimumSizeHint().height();
-            int w = fm.width(BitcoinUnits::format(BitcoinUnits::STONE, BitcoinUnits::maxMoney(), false, BitcoinUnits::separatorAlways));
+            int w = fm.width(BitcoinUnits::format(BitcoinUnits::stone, BitcoinUnits::maxMoney(), false, BitcoinUnits::separatorAlways));
             w += 2; // cursor blinking space
 
             QStyleOptionSpinBox opt;
@@ -245,7 +245,7 @@ void BitcoinAmountField::setValid(bool valid)
     if (valid)
         amount->setStyleSheet("");
     else
-        amount->setStyleSheet(STYLE_INVALID);
+        amount->setStyleSheet(GUIUtil::getThemedStyleQString(GUIUtil::ThemedStyle::TS_INVALID));
 }
 
 bool BitcoinAmountField::eventFilter(QObject *object, QEvent *event)

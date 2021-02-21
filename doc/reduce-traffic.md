@@ -13,14 +13,13 @@ Ways to reduce traffic:
 ## 1. Use `-maxuploadtarget=<MiB per day>`
 
 A major component of the traffic is caused by serving historic blocks to other nodes
-during the initial blocks download stone (syncing up a new node).
+during the initial blocks download phase (syncing up a new node).
 This option can be specified in MiB per day and is turned off by default.
 This is *not* a hard limit; only a threshold to minimize the outbound
 traffic. When the limit is about to be reached, the uploaded data is cut by no
 longer serving historic blocks (blocks older than one week).
 Keep in mind that new nodes require other nodes that are willing to serve
-historic blocks. **The recommended minimum is 144 blocks per day (max. 144MB
-per day)**
+historic blocks.
 
 Whitelisted peers will never be disconnected, although their traffic counts for
 calculating the target.

@@ -1,12 +1,12 @@
-TOR SUPPORT IN STONE CORE
+TOR SUPPORT IN stone CORE
 =======================
 
 It is possible to run Stone Core as a Tor hidden service, and connect to such services.
 
 The following directions assume you have a Tor proxy running on port 9050. Many
 distributions default to having a SOCKS proxy listening on port 9050, but others
-may not. In particular, the Tor Browser Bundle defaults to listening on a random
-port. See [Tor Project FAQ:TBBSocksPort](https://www.torproject.org/docs/faq.html.en#TBBSocksPort)
+may not. In particular, the Tor Browser Bundle defaults to listening on port 9150.
+See [Tor Project FAQ:TBBSocksPort](https://www.torproject.org/docs/faq.html.en#TBBSocksPort)
 for how to properly configure Tor.
 
 
@@ -102,17 +102,18 @@ for normal IPv4/IPv6 communication, use:
 3. List of known Stone Core Tor relays
 ------------------------------------
 
-* [darkcoinie7ghp67.onion](http://darkcoinie7ghp67.onion/)
-* [drktalkwaybgxnoq.onion](http://drktalkwaybgxnoq.onion/)
-* [drkcoinooditvool.onion](http://drkcoinooditvool.onion/)
-* [darkcoxbtzggpmcc.onion](http://darkcoxbtzggpmcc.onion/)
-* [ssapp53tmftyjmjb.onion](http://ssapp53tmftyjmjb.onion/)
-* [j2dfl3cwxyxpbc7s.onion](http://j2dfl3cwxyxpbc7s.onion/)
-* [vf6d2mxpuhh2cbxt.onion](http://vf6d2mxpuhh2cbxt.onion/)
-* [rj24sicr6i4vsnkv.onion](http://rj24sicr6i4vsnkv.onion/)
-* [wrwx2dy7jyh32o53.onion](http://wrwx2dy7jyh32o53.onion/)
-* [f5ekot4ajkbe23gt.onion](http://f5ekot4ajkbe23gt.onion/)
-* [dshtord4mqvgzqev.onion](http://dshtord4mqvgzqev.onion/)
+Note: All these nodes are hosted by masternodehosting.com
+
+* l7oq3v7ujau5tfrw.onion
+* vsmegqxisccimsir.onion
+* 4rbha5nrjso54l75.onion
+* 3473226fvgoenztx.onion
+* onn5v3aby2dioicx.onion
+* w5n7s2p3mdq5yf2d.onion
+* ec4qdvujskzasvrb.onion
+* g5e4hvsecwri3inf.onion
+* ys5upbdeotplam3y.onion
+* fijy6aikzxfea54i.onion
 
 
 4. Automatically listen on Tor
@@ -122,12 +123,31 @@ Starting with Tor version 0.2.7.1 it is possible, through Tor's control socket
 API, to create and destroy 'ephemeral' hidden services programmatically.
 Stone Core has been updated to make use of this.
 
-This means that if Tor is running (and proper authorization is available),
-Stone Core automatically creates a hidden service to listen on, without
-manual configuration. This will positively affect the number of available
-.onion nodes.
+This means that if Tor is running (and proper authentication has been configured),
+Stone Core automatically creates a hidden service to listen on. This will positively 
+affect the number of available .onion nodes.
 
-This new feature is enabled by default if Stone Core is listening, and
-a connection to Tor can be made. It can be configured with the `-listenonion`,
-`-torcontrol` and `-torpassword` settings. To show verbose debugging
-information, pass `-debug=tor`.
+This new feature is enabled by default if Stone Core is listening (`-listen`), and
+requires a Tor connection to work. It can be explicitly disabled with `-listenonion=0`
+and, if not disabled, configured using the `-torcontrol` and `-torpassword` settings.
+To show verbose debugging information, pass `-debug=tor`.
+
+Connecting to Tor's control socket API requires one of two authentication methods to be 
+configured. For cookie authentication the user running stoned must have write access 
+to the `CookieAuthFile` specified in Tor configuration. In some cases this is 
+preconfigured and the creation of a hidden service is automatic. If permission problems 
+are seen with `-debug=tor` they can be resolved by adding both the user running tor and 
+the user running stoned to the same group and setting permissions appropriately. On 
+Debian-based systems the user running stoned can be added to the debian-tor group, 
+which has the appropriate permissions. An alternative authentication method is the use 
+of the `-torpassword` flag and a `hash-password` which can be enabled and specified in 
+Tor configuration.
+
+5. Privacy recommendations
+---------------------------
+
+- Do not add anything but bitcoin ports to the hidden service created in section 2.
+  If you run a web service too, create a new hidden service for that.
+  Otherwise it is trivial to link them, which may reduce privacy. Hidden
+  services created automatically (as in section 3) always have only one port
+  open.

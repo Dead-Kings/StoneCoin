@@ -1,18 +1,18 @@
-Stone Core 1.0.0
-=====================
+Stone Core
+==========
 
-This is the official reference wallet for Proton digital currency and comprises the backbone of the Proton peer-to-peer network. You can [download Stone Core](https://stone.io) or [build it yourself](#building) using the guides below.
+This is the official reference wallet for stone digital currency and comprises the backbone of the stone peer-to-peer network. You can [download Stone Core](https://www.stone.cx/downloads/) or [build it yourself](#building) using the guides below.
 
 Running
 ---------------------
-The following are some helpful notes on how to run Proton on your native platform.
+The following are some helpful notes on how to run stone on your native platform.
 
 ### Unix
 
 Unpack the files into a directory and run:
 
-- `bin/bitcoin-qt` (GUI) or
-- `bin/bitcoind` (headless)
+- `bin/stone-qt` (GUI) or
+- `bin/stoned` (headless)
 
 ### Windows
 
@@ -20,14 +20,16 @@ Unpack the files into a directory, and then run stone-qt.exe.
 
 ### OS X
 
-Drag Proton-Qt to your applications folder, and then run Proton-Qt.
+Drag stone-Qt to your applications folder, and then run stone-Qt.
 
 ### Need Help?
 
-* See the [Proton documentation](https://stone.atlassian.net/wiki/display/DOC)
+* See the [stone documentation](https://docs.stone.cx)
 for help and more information.
-* Ask for help on [#stone](http://webchat.freenode.net?channels=stone) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=stone).
-* Ask for help on the [ProtonTalk](https://stonetalk.org/) forums.
+* See the [stone Developer Documentation](https://stone-docs.github.io/) 
+for technical specifications and implementation details.
+* Ask for help on [stone Nation Discord](http://stonechat.org)
+* Ask for help on the [stone Forum](https://stone.cx/forum)
 
 Building
 ---------------------
@@ -44,30 +46,33 @@ Development
 The Stone Core repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
-- [Multiwallet Qt Development](multiwallet-qt.md)
 - [Release Notes](release-notes.md)
 - [Release Process](release-process.md)
 - Source Code Documentation ***TODO***
 - [Translation Process](translation_process.md)
 - [Translation Strings Policy](translation_strings_policy.md)
-- [Unit Tests](unit-tests.md)
+- [Travis CI](travis-ci.md)
 - [Unauthenticated REST Interface](REST-interface.md)
 - [Shared Libraries](shared-libraries.md)
 - [BIPS](bips.md)
 - [Dnsseed Policy](dnsseed-policy.md)
+- [Benchmarking](benchmarking.md)
 
 ### Resources
-* Discuss on the [ProtonTalk](https://stonetalk.org/) forums, in the Development & Technical Discussion board.
-* Discuss on [#stone](http://webchat.freenode.net/?channels=stone) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net/?channels=stone).
+* Discuss on the [stone Forum](https://stone.cx/forum), in the Development & Technical Discussion board.
+* Discuss on [stone Nation Discord](http://stonechat.org)
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
 - [Files](files.md)
+- [Fuzz-testing](fuzzing.md)
+- [Reduce Traffic](reduce-traffic.md)
 - [Tor Support](tor.md)
 - [Init Scripts (systemd/upstart/openrc)](init.md)
+- [ZMQ](zmq.md)
 
 License
 ---------------------
-Distributed under the [MIT software license](http://www.opensource.org/licenses/mit-license.php).
+Distributed under the [MIT software license](/COPYING).
 This product includes software developed by the OpenSSL Project for use in the [OpenSSL Toolkit](https://www.openssl.org/). This product includes
 cryptographic software written by Eric Young ([eay@cryptsoft.com](mailto:eay@cryptsoft.com)), and UPnP software written by Thomas Bernard.

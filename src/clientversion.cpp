@@ -55,7 +55,7 @@ const std::string CLIENT_NAME("Stone Core");
     "v" DO_STRINGIZE(maj) "." DO_STRINGIZE(min) "." DO_STRINGIZE(rev) "." DO_STRINGIZE(build) "-g" commit
 
 #define BUILD_DESC_FROM_UNKNOWN(maj, min, rev, build) \
-    "v" DO_STRINGIZE(maj) "." DO_STRINGIZE(min) "." DO_STRINGIZE(rev) "." DO_STRINGIZE(build) "-99"
+    "v" DO_STRINGIZE(maj) "." DO_STRINGIZE(min) "." DO_STRINGIZE(rev) "." DO_STRINGIZE(build) "-unk"
 
 #ifndef BUILD_DESC
 #ifdef BUILD_SUFFIX
@@ -67,18 +67,9 @@ const std::string CLIENT_NAME("Stone Core");
 #endif
 #endif
 
-#ifndef BUILD_DATE
-#ifdef GIT_COMMIT_DATE
-#define BUILD_DATE GIT_COMMIT_DATE
-#else
-#define BUILD_DATE __DATE__ ", " __TIME__
-#endif
-#endif
-
 const std::string CLIENT_BUILD(BUILD_DESC CLIENT_VERSION_SUFFIX);
-const std::string CLIENT_DATE(BUILD_DATE);
 
-static std::string FormatVersion(int nVersion)
+std::string FormatVersion(int nVersion)
 {
     if (nVersion % 100 == 0)
         return strprintf("%d.%d.%d", nVersion / 1000000, (nVersion / 10000) % 100, (nVersion / 100) % 100);

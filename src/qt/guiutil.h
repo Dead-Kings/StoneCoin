@@ -6,6 +6,7 @@
 #define BITCOIN_QT_GUIUTIL_H
 
 #include "amount.h"
+#include "fs.h"
 
 #include <QEvent>
 #include <QHeaderView>
@@ -14,8 +15,7 @@
 #include <QProgressBar>
 #include <QString>
 #include <QTableView>
-
-#include <boost/filesystem.hpp>
+#include <QLabel>
 
 class QValidatedLineEdit;
 class SendCoinsRecipient;
@@ -29,10 +29,51 @@ class QUrl;
 class QWidget;
 QT_END_NAMESPACE
 
-/** Utility functions used by the Proton Qt UI.
+/** Utility functions used by the stone Qt UI.
  */
 namespace GUIUtil
 {
+    /* Enumeration of possible "colors" */
+    enum class ThemedColor {
+        /* Transaction list -- TX status decoration - default color */
+        DEFAULT,
+        /* Transaction list -- unconfirmed transaction */
+        UNCONFIRMED,
+        /* Transaction list -- negative amount */
+        NEGATIVE,
+        /* Transaction list -- bare address (without label) */
+        BAREADDRESS,
+        /* Transaction list -- TX status decoration - open until date */
+        TX_STATUS_OPENUNTILDATE,
+        /* Transaction list -- TX status decoration - offline */
+        TX_STATUS_OFFLINE,
+        /* Transaction list -- TX status decoration - danger, tx needs attention */
+        TX_STATUS_DANGER,
+        /* Transaction list -- TX status decoration - LockedByInstantSend color */
+        TX_STATUS_LOCKED,
+    };
+
+    /* Enumeration of possible "styles" */
+    enum class ThemedStyle {
+        /* Invalid field background style */
+        TS_INVALID,
+        /* Failed operation text style */
+        TS_ERROR,
+        /* Failed operation text style */
+        TS_SUCCESS,
+        /* Comand text style */
+        TS_COMMAND,
+        /* General text styles */
+        TS_PRIMARY,
+        TS_SECONDARY,
+    };
+
+    /** Helper to get colors for various themes which can't be applied via css for some reason */
+    QColor getThemedQColor(ThemedColor color);
+
+    /** Helper to get css style strings which are injected into rich text through qt */
+    QString getThemedStyleQString(ThemedStyle style);
+
     // Create human-readable string from date
     QString dateTimeStr(const QDateTime &datetime);
     QString dateTimeStr(qint64 nTime);
@@ -67,10 +108,9 @@ namespace GUIUtil
     /** Return a field of the currently selected entry as a QString. Does nothing if nothing
         is selected.
        @param[in] column  Data column to extract from the model
-       @param[in] role    Data role to extract from the model
        @see  TransactionView::copyLabel, TransactionView::copyAmount, TransactionView::copyAddress
      */
-    QString getEntryData(QAbstractItemView *view, int column, int role);
+    QList<QModelIndex> getEntryData(QAbstractItemView *view, int column);
 
     void setClipboard(const QString& str);
 
@@ -117,9 +157,6 @@ namespace GUIUtil
     // Open stone.conf
     void openConfigfile();	
 
-    // Open masternode.conf
-    void openMNConfigfile();	
-
     // Browse backup folder
     void showBackups();
 
@@ -149,7 +186,7 @@ namespace GUIUtil
      * Also makes sure the column widths are never larger than the table's viewport.
      * In Qt, all columns are resizable from the right, but it's not intuitive resizing the last column from the right.
      * Usually our second to last columns behave as if stretched, and when on strech mode, columns aren't resizable
-     * interactively or programatically.
+     * interactively or programmatically.
      *
      * This helper object takes care of this issue.
      *
@@ -159,7 +196,7 @@ namespace GUIUtil
         Q_OBJECT
 
         public:
-            TableViewLastColumnResizingFixer(QTableView* table, int lastColMinimumWidth, int allColsMinimumWidth);
+            TableViewLastColumnResizingFixer(QTableView* table, int lastColMinimumWidth, int allColsMinimumWidth, QObject *parent);
             void stretchColumnWidth(int column);
 
         private:
@@ -189,22 +226,14 @@ namespace GUIUtil
     /** Modify Qt network specific settings on migration */
     void migrateQtSettings();
 
-    /** Save window size and position */
-    void saveWindowGeometry(const QString& strSetting, QWidget *parent);
-    /** Restore window size and position */
-    void restoreWindowGeometry(const QString& strSetting, const QSize &defaultSizeIn, QWidget *parent);
-
     /** Load global CSS theme */
     QString loadStyleSheet();
 
-    /** Return name of current CSS theme */
-    QString getThemeName();
-    
     /* Convert QString to OS specific boost path through UTF-8 */
-    boost::filesystem::path qstringToBoostPath(const QString &path);
+    fs::path qstringToBoostPath(const QString &path);
 
     /* Convert OS specific boost path to QString through UTF-8 */
-    QString boostPathToQString(const boost::filesystem::path &path);
+    QString boostPathToQString(const fs::path &path);
 
     /* Convert seconds into a QString with days, hours, mins, secs */
     QString formatDurationStr(int secs);
@@ -218,18 +247,46 @@ namespace GUIUtil
     /* Format a CNodeCombinedStats.nTimeOffset into a user-readable string. */
     QString formatTimeOffset(int64_t nTimeOffset);
 
+    QString formatNiceTimeOffset(qint64 secs);
+
+    class ClickableLabel : public QLabel
+    {
+        Q_OBJECT
+
+    Q_SIGNALS:
+        /** Emitted when the label is clicked. The relative mouse coordinates of the click are
+         * passed to the signal.
+         */
+        void clicked(const QPoint& point);
+    protected:
+        void mouseReleaseEvent(QMouseEvent *event);
+    };
+    
+    class ClickableProgressBar : public QProgressBar
+    {
+        Q_OBJECT
+        
+    Q_SIGNALS:
+        /** Emitted when the progressbar is clicked. The relative mouse coordinates of the click are
+         * passed to the signal.
+         */
+        void clicked(const QPoint& point);
+    protected:
+        void mouseReleaseEvent(QMouseEvent *event);
+    };
+
 #if defined(Q_OS_MAC) && QT_VERSION >= 0x050000
     // workaround for Qt OSX Bug:
     // https://bugreports.qt-project.org/browse/QTBUG-15631
     // QProgressBar uses around 10% CPU even when app is in background
-    class ProgressBar : public QProgressBar
+    class ProgressBar : public ClickableProgressBar
     {
         bool event(QEvent *e) {
             return (e->type() != QEvent::StyleAnimationUpdate) ? QProgressBar::event(e) : false;
         }
     };
 #else
-    typedef QProgressBar ProgressBar;
+    typedef ClickableProgressBar ProgressBar;
 #endif
 
 } // namespace GUIUtil

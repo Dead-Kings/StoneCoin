@@ -1,6 +1,5 @@
 // Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2017-2018 The Stone Core developers
+// Copyright (c) 2014-2019 The Stone Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,10 +19,10 @@ BitcoinUnits::BitcoinUnits(QObject *parent):
 QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
 {
     QList<BitcoinUnits::Unit> unitlist;
-    unitlist.append(STONE);
-    unitlist.append(mSTONE);
-    unitlist.append(uSTONE);
-    unitlist.append(duffs);
+    unitlist.append(stone);
+    unitlist.append(mstone);
+    unitlist.append(ustone);
+    unitlist.append(twigs);
     return unitlist;
 }
 
@@ -31,10 +30,10 @@ bool BitcoinUnits::valid(int unit)
 {
     switch(unit)
     {
-    case STONE:
-    case mSTONE:
-    case uSTONE:
-    case duffs:
+    case stone:
+    case mstone:
+    case ustone:
+    case twigs:
         return true;
     default:
         return false;
@@ -47,10 +46,10 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-            case STONE: return QString("STONE");
-            case mSTONE: return QString("mSTONE");
-            case uSTONE: return QString::fromUtf8("μSTONE");
-            case duffs: return QString("duffs");
+            case stone: return QString("STONE");
+            case mstone: return QString("mSTONE");
+            case ustone: return QString::fromUtf8("μSTONE");
+            case twigs: return QString("twigs");
             default: return QString("???");
         }
     }
@@ -58,10 +57,10 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-            case STONE: return QString("tSTONE");
-            case mSTONE: return QString("mtSTONE");
-            case uSTONE: return QString::fromUtf8("μtSTONE");
-            case duffs: return QString("tduffs");
+            case stone: return QString("tSTONE");
+            case mstone: return QString("mtSTONE");
+            case ustone: return QString::fromUtf8("μtSTONE");
+            case twigs: return QString("ttwigs");
             default: return QString("???");
         }
     }
@@ -73,10 +72,10 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-            case STONE: return QString("Stone");
-            case mSTONE: return QString("Milli-Stone (1 / 1" THIN_SP_UTF8 "000)");
-            case uSTONE: return QString("Micro-Stone (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-Stone (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case stone: return QString("STONE");
+            case mstone: return QString("Milli-STONE (1 / 1" THIN_SP_UTF8 "000)");
+            case ustone: return QString("Micro-STONE (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case twigs: return QString("Ten Nano-STONE (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -84,10 +83,10 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-            case STONE: return QString("TestStones");
-            case mSTONE: return QString("Milli-TestStone (1 / 1" THIN_SP_UTF8 "000)");
-            case uSTONE: return QString("Micro-TestStone (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-TestStone (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case stone: return QString("TestSTONEs");
+            case mstone: return QString("Milli-TestSTONE (1 / 1" THIN_SP_UTF8 "000)");
+            case ustone: return QString("Micro-TestSTONE (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case twigs: return QString("Ten Nano-TestSTONE (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -97,10 +96,10 @@ qint64 BitcoinUnits::factor(int unit)
 {
     switch(unit)
     {
-    case STONE:  return 100000000;
-    case mSTONE: return 100000;
-    case uSTONE: return 100;
-    case duffs: return 1;
+    case stone:  return 100000000;
+    case mstone: return 100000;
+    case ustone: return 100;
+    case twigs: return 1;
     default:   return 100000000;
     }
 }
@@ -109,10 +108,10 @@ int BitcoinUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case STONE: return 8;
-    case mSTONE: return 5;
-    case uSTONE: return 2;
-    case duffs: return 0;
+    case stone: return 8;
+    case mstone: return 5;
+    case ustone: return 2;
+    case twigs: return 0;
     default: return 0;
     }
 }

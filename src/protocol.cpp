@@ -28,29 +28,20 @@ const char *GETADDR="getaddr";
 const char *MEMPOOL="mempool";
 const char *PING="ping";
 const char *PONG="pong";
-const char *ALERT="alert";
 const char *NOTFOUND="notfound";
 const char *FILTERLOAD="filterload";
 const char *FILTERADD="filteradd";
 const char *FILTERCLEAR="filterclear";
 const char *REJECT="reject";
 const char *SENDHEADERS="sendheaders";
-// Proton message types
-const char *TXLOCKREQUEST="ix";
-const char *TXLOCKVOTE="txlvote";
+const char *SENDCMPCT="sendcmpct";
+const char *CMPCTBLOCK="cmpctblock";
+const char *GETBLOCKTXN="getblocktxn";
+const char *BLOCKTXN="blocktxn";
+// stone message types
+const char *LEGACYTXLOCKREQUEST="ix";
 const char *SPORK="spork";
 const char *GETSPORKS="getsporks";
-const char *MASTERNODEPAYMENTVOTE="mnw";
-const char *MASTERNODEPAYMENTBLOCK="mnwb";
-const char *MASTERNODEPAYMENTSYNC="mnget";
-const char *MNBUDGETSYNC="mnvs"; // depreciated since 12.1
-const char *MNBUDGETVOTE="mvote"; // depreciated since 12.1
-const char *MNBUDGETPROPOSAL="mprop"; // depreciated since 12.1
-const char *MNBUDGETFINAL="fbs"; // depreciated since 12.1
-const char *MNBUDGETFINALVOTE="fbvote"; // depreciated since 12.1
-const char *MNQUORUM="mn quorum"; // not implemented
-const char *MNANNOUNCE="mnb";
-const char *MNPING="mnp";
 const char *DSACCEPT="dsa";
 const char *DSVIN="dsi";
 const char *DSFINALTX="dsf";
@@ -59,39 +50,29 @@ const char *DSCOMPLETE="dsc";
 const char *DSSTATUSUPDATE="dssu";
 const char *DSTX="dstx";
 const char *DSQUEUE="dsq";
-const char *DSEG="dseg";
+const char *SENDDSQUEUE="senddsq";
 const char *SYNCSTATUSCOUNT="ssc";
 const char *MNGOVERNANCESYNC="govsync";
 const char *MNGOVERNANCEOBJECT="govobj";
 const char *MNGOVERNANCEOBJECTVOTE="govobjvote";
-const char *MNVERIFY="mnv";
-};
-
-static const char* ppszTypeName[] =
-{
-    "ERROR", // Should never occur
-    NetMsgType::TX,
-    NetMsgType::BLOCK,
-    "filtered block", // Should never occur
-    // Proton message types
-    // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
-    NetMsgType::TXLOCKREQUEST,
-    NetMsgType::TXLOCKVOTE,
-    NetMsgType::SPORK,
-    NetMsgType::MASTERNODEPAYMENTVOTE,
-    NetMsgType::MASTERNODEPAYMENTBLOCK, // reusing, was MNSCANERROR previousely, was NOT used in 12.0, we need this for inv
-    NetMsgType::MNBUDGETVOTE, // depreciated since 12.1
-    NetMsgType::MNBUDGETPROPOSAL, // depreciated since 12.1
-    NetMsgType::MNBUDGETFINAL, // depreciated since 12.1
-    NetMsgType::MNBUDGETFINALVOTE, // depreciated since 12.1
-    NetMsgType::MNQUORUM, // not implemented
-    NetMsgType::MNANNOUNCE,
-    NetMsgType::MNPING,
-    NetMsgType::DSTX,
-    NetMsgType::MNGOVERNANCEOBJECT,
-    NetMsgType::MNGOVERNANCEOBJECTVOTE,
-    NetMsgType::MNVERIFY,
-};
+const char *GETMNLISTDIFF="getmnlistd";
+const char *MNLISTDIFF="mnlistdiff";
+const char *QSENDRECSIGS="qsendrecsigs";
+const char *QFCOMMITMENT="qfcommit";
+const char *QCONTRIB="qcontrib";
+const char *QCOMPLAINT="qcomplaint";
+const char *QJUSTIFICATION="qjustify";
+const char *QPCOMMITMENT="qpcommit";
+const char *QWATCH="qwatch";
+const char *QSIGSESANN="qsigsesann";
+const char *QSIGSHARESINV="qsigsinv";
+const char *QGETSIGSHARES="qgetsigs";
+const char *QBSIGSHARES="qbsigs";
+const char *QSIGREC="qsigrec";
+const char *CLSIG="clsig";
+const char *ISLOCK="islock";
+const char *MNAUTH="mnauth";
+}; // namespace NetMsgType
 
 /** All known message types. Keep this in the same order as the list of
  * messages above and in protocol.h.
@@ -112,24 +93,22 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::MEMPOOL,
     NetMsgType::PING,
     NetMsgType::PONG,
-    NetMsgType::ALERT,
     NetMsgType::NOTFOUND,
     NetMsgType::FILTERLOAD,
     NetMsgType::FILTERADD,
     NetMsgType::FILTERCLEAR,
     NetMsgType::REJECT,
     NetMsgType::SENDHEADERS,
-    // Proton message types
+    NetMsgType::SENDCMPCT,
+    NetMsgType::CMPCTBLOCK,
+    NetMsgType::GETBLOCKTXN,
+    NetMsgType::BLOCKTXN,
+    // stone message types
     // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
-    NetMsgType::TXLOCKREQUEST,
-    NetMsgType::TXLOCKVOTE,
+    NetMsgType::LEGACYTXLOCKREQUEST,
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,
-    NetMsgType::MASTERNODEPAYMENTVOTE,
-    // NetMsgType::MASTERNODEPAYMENTBLOCK, // there is no message for this, only inventory
-    NetMsgType::MASTERNODEPAYMENTSYNC,
-    NetMsgType::MNANNOUNCE,
-    NetMsgType::MNPING,
+    NetMsgType::SENDDSQUEUE,
     NetMsgType::DSACCEPT,
     NetMsgType::DSVIN,
     NetMsgType::DSFINALTX,
@@ -138,12 +117,27 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::DSSTATUSUPDATE,
     NetMsgType::DSTX,
     NetMsgType::DSQUEUE,
-    NetMsgType::DSEG,
     NetMsgType::SYNCSTATUSCOUNT,
     NetMsgType::MNGOVERNANCESYNC,
     NetMsgType::MNGOVERNANCEOBJECT,
     NetMsgType::MNGOVERNANCEOBJECTVOTE,
-    NetMsgType::MNVERIFY,
+    NetMsgType::GETMNLISTDIFF,
+    NetMsgType::MNLISTDIFF,
+    NetMsgType::QSENDRECSIGS,
+    NetMsgType::QFCOMMITMENT,
+    NetMsgType::QCONTRIB,
+    NetMsgType::QCOMPLAINT,
+    NetMsgType::QJUSTIFICATION,
+    NetMsgType::QPCOMMITMENT,
+    NetMsgType::QWATCH,
+    NetMsgType::QSIGSESANN,
+    NetMsgType::QSIGSHARESINV,
+    NetMsgType::QGETSIGSHARES,
+    NetMsgType::QBSIGSHARES,
+    NetMsgType::QSIGREC,
+    NetMsgType::CLSIG,
+    NetMsgType::ISLOCK,
+    NetMsgType::MNAUTH,
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 
@@ -152,7 +146,7 @@ CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn)
     memcpy(pchMessageStart, pchMessageStartIn, MESSAGE_START_SIZE);
     memset(pchCommand, 0, sizeof(pchCommand));
     nMessageSize = -1;
-    nChecksum = 0;
+    memset(pchChecksum, 0, CHECKSUM_SIZE);
 }
 
 CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn, const char* pszCommand, unsigned int nMessageSizeIn)
@@ -161,7 +155,7 @@ CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn, const
     memset(pchCommand, 0, sizeof(pchCommand));
     strncpy(pchCommand, pszCommand, COMMAND_SIZE);
     nMessageSize = nMessageSizeIn;
-    nChecksum = 0;
+    memset(pchChecksum, 0, CHECKSUM_SIZE);
 }
 
 std::string CMessageHeader::GetCommand() const
@@ -206,7 +200,7 @@ CAddress::CAddress() : CService()
     Init();
 }
 
-CAddress::CAddress(CService ipIn, uint64_t nServicesIn) : CService(ipIn)
+CAddress::CAddress(CService ipIn, ServiceFlags nServicesIn) : CService(ipIn)
 {
     Init();
     nServices = nServicesIn;
@@ -214,7 +208,7 @@ CAddress::CAddress(CService ipIn, uint64_t nServicesIn) : CService(ipIn)
 
 void CAddress::Init()
 {
-    nServices = NODE_NETWORK;
+    nServices = NODE_NONE;
     nTime = 100000000;
 }
 
@@ -224,27 +218,7 @@ CInv::CInv()
     hash.SetNull();
 }
 
-CInv::CInv(int typeIn, const uint256& hashIn)
-{
-    type = typeIn;
-    hash = hashIn;
-}
-
-CInv::CInv(const std::string& strType, const uint256& hashIn)
-{
-    unsigned int i;
-    for (i = 1; i < ARRAYLEN(ppszTypeName); i++)
-    {
-        if (strType == ppszTypeName[i])
-        {
-            type = i;
-            break;
-        }
-    }
-    if (i == ARRAYLEN(ppszTypeName))
-        throw std::out_of_range(strprintf("CInv::CInv(string, uint256): unknown type '%s'", strType));
-    hash = hashIn;
-}
+CInv::CInv(int typeIn, const uint256& hashIn) : type(typeIn), hash(hashIn) {}
 
 bool operator<(const CInv& a, const CInv& b)
 {
@@ -253,19 +227,52 @@ bool operator<(const CInv& a, const CInv& b)
 
 bool CInv::IsKnownType() const
 {
-    return (type >= 1 && type < (int)ARRAYLEN(ppszTypeName));
+    return GetCommandInternal() != nullptr;
 }
 
-const char* CInv::GetCommand() const
+const char* CInv::GetCommandInternal() const
 {
-    if (!IsKnownType())
+    switch (type)
+    {
+        case MSG_TX:                            return NetMsgType::TX;
+        case MSG_BLOCK:                         return NetMsgType::BLOCK;
+        case MSG_FILTERED_BLOCK:                return NetMsgType::MERKLEBLOCK;
+        case MSG_LEGACY_TXLOCK_REQUEST:         return NetMsgType::LEGACYTXLOCKREQUEST;
+        case MSG_CMPCT_BLOCK:                   return NetMsgType::CMPCTBLOCK;
+        case MSG_SPORK:                         return NetMsgType::SPORK;
+        case MSG_DSTX:                          return NetMsgType::DSTX;
+        case MSG_GOVERNANCE_OBJECT:             return NetMsgType::MNGOVERNANCEOBJECT;
+        case MSG_GOVERNANCE_OBJECT_VOTE:        return NetMsgType::MNGOVERNANCEOBJECTVOTE;
+        case MSG_QUORUM_FINAL_COMMITMENT:       return NetMsgType::QFCOMMITMENT;
+        case MSG_QUORUM_CONTRIB:                return NetMsgType::QCONTRIB;
+        case MSG_QUORUM_COMPLAINT:              return NetMsgType::QCOMPLAINT;
+        case MSG_QUORUM_JUSTIFICATION:          return NetMsgType::QJUSTIFICATION;
+        case MSG_QUORUM_PREMATURE_COMMITMENT:   return NetMsgType::QPCOMMITMENT;
+        case MSG_QUORUM_RECOVERED_SIG:          return NetMsgType::QSIGREC;
+        case MSG_CLSIG:                         return NetMsgType::CLSIG;
+        case MSG_ISLOCK:                        return NetMsgType::ISLOCK;
+        default:
+            return nullptr;
+    }
+}
+
+std::string CInv::GetCommand() const
+{
+    auto cmd = GetCommandInternal();
+    if (cmd == nullptr) {
         throw std::out_of_range(strprintf("CInv::GetCommand(): type=%d unknown type", type));
-    return ppszTypeName[type];
+    }
+    return cmd;
 }
 
 std::string CInv::ToString() const
 {
-    return strprintf("%s %s", GetCommand(), hash.ToString());
+    auto cmd = GetCommandInternal();
+    if (!cmd) {
+        return strprintf("0x%08x %s", type, hash.ToString());
+    } else {
+        return strprintf("%s %s", cmd, hash.ToString());
+    }
 }
 
 const std::vector<std::string> &getAllNetMessageTypes()

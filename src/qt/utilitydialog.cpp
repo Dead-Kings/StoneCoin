@@ -1,8 +1,11 @@
 // Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2017-2018 The Stone Core developers
+// Copyright (c) 2014-2019 The Stone Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+#if defined(HAVE_CONFIG_H)
+#include "config/stone-config.h"
+#endif
 
 #include "utilitydialog.h"
 
@@ -11,6 +14,7 @@
 #include "bitcoingui.h"
 #include "clientmodel.h"
 #include "guiconstants.h"
+#include "guiutil.h"
 #include "intro.h"
 #include "paymentrequestplus.h"
 #include "guiutil.h"
@@ -35,9 +39,9 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
 {
     ui->setupUi(this);
 
-    QString version = tr("Stone Core") + " " + tr("version") + " " + QString::fromStdString(FormatFullVersion());
+    QString version = tr(PACKAGE_NAME) + " " + tr("version") + " " + QString::fromStdString(FormatFullVersion());
     /* On x86 add a bit specifier to the version so that users can distinguish between
-     * 32 and 64 bit builds. On other architectures, 32/64 bit may be more ambigious.
+     * 32 and 64 bit builds. On other architectures, 32/64 bit may be more ambiguous.
      */
 #if defined(__x86_64__)
     version += " " + tr("(%1-bit)").arg(64);
@@ -47,7 +51,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
 
     if (helpMode == about)
     {
-        setWindowTitle(tr("About Stone Core"));
+        setWindowTitle(tr("About %1").arg(tr(PACKAGE_NAME)));
 
         /// HTML-format the license message from the core
         QString licenseInfo = QString::fromStdString(LicenseInfo());
@@ -58,7 +62,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         uri.setMinimal(true); // use non-greedy matching
         licenseInfoHTML.replace(uri, "<a href=\"\\1\">\\1</a>");
         // Replace newlines with HTML breaks
-        licenseInfoHTML.replace("\n\n", "<br><br>");
+        licenseInfoHTML.replace("\n", "<br>");
 
         ui->aboutMessage->setTextFormat(Qt::RichText);
         ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -77,7 +81,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         cursor.insertBlock();
 
         std::string strUsage = HelpMessage(HMM_BITCOIN_QT);
-        const bool showDebug = GetBoolArg("-help-debug", false);
+        const bool showDebug = gArgs.GetBoolArg("-help-debug", false);
         strUsage += HelpMessageGroup(tr("UI Options:").toStdString());
         if (showDebug) {
             strUsage += HelpMessageOpt("-allowselfsignedrootcertificates", strprintf("Allow self signed root certificates (default: %u)", DEFAULT_SELFSIGNED_ROOTCERTS));
@@ -87,7 +91,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         strUsage += HelpMessageOpt("-min", tr("Start minimized").toStdString());
         strUsage += HelpMessageOpt("-rootcertificates=<file>", tr("Set SSL root certificates for payment request (default: -system-)").toStdString());
         strUsage += HelpMessageOpt("-splash", strprintf(tr("Show splash screen on startup (default: %u)").toStdString(), DEFAULT_SPLASHSCREEN));
-        strUsage += HelpMessageOpt("-resetguisettings", tr("Reset all settings changes made over the GUI").toStdString());
+        strUsage += HelpMessageOpt("-resetguisettings", tr("Reset all settings changed in the GUI").toStdString());
         if (showDebug) {
             strUsage += HelpMessageOpt("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", BitcoinGUI::DEFAULT_UIPLATFORM));
         }
@@ -105,7 +109,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         QTextCharFormat bold;
         bold.setFontWeight(QFont::Bold);
 
-        Q_FOREACH (const QString &line, coreOptions.split("\n")) {
+        for (const QString &line : coreOptions.split("\n")) {
             if (line.startsWith("  -"))
             {
                 cursor.currentTable()->appendRows(1);
@@ -127,7 +131,6 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
 
         ui->helpMessage->moveCursor(QTextCursor::Start);
         ui->scrollArea->setVisible(false);
-        ui->aboutLogo->setVisible(false);
     } else if (helpMode == pshelp) {
         setWindowTitle(tr("PrivateSend information"));
 
@@ -136,13 +139,13 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, HelpMode helpMode) :
         ui->aboutMessage->setText(tr("\
 <h3>PrivateSend Basics</h3> \
 PrivateSend gives you true financial privacy by obscuring the origins of your funds. \
-All the Proton in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
-PrivateSend uses an stonetive process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. \
-You retain control of your money at all times..<hr> \
+All the stone in your wallet is comprised of different \"inputs\" which you can think of as separate, discrete coins.<br> \
+PrivateSend uses an innovative process to mix your inputs with the inputs of two other people, without having your coins ever leave your wallet. \
+You retain control of your money at all times.<hr> \
 <b>The PrivateSend process works like this:</b>\
 <ol type=\"1\"> \
 <li>PrivateSend begins by breaking your transaction inputs down into standard denominations. \
-These denominations are 0.01 STONE, 0.1 STONE, 1 STONE and 10 STONE -- sort of like the paper money you use every day.</li> \
+These denominations are 0.001 stone, 0.01 stone, 0.1 stone, 1 stone and 10 stone -- sort of like the paper money you use every day.</li> \
 <li>Your wallet then sends requests to specially configured software nodes on the network, called \"masternodes.\" \
 These masternodes are informed then that you are interested in mixing a certain denomination. \
 No identifiable information is sent to the masternodes, so they never know \"who\" you are.</li> \
@@ -152,22 +155,17 @@ Your wallet pays that denomination directly to itself, but in a different addres
 <li>In order to fully obscure your funds, your wallet must repeat this process a number of times with each denomination. \
 Each time the process is completed, it's called a \"round.\" Each round of PrivateSend makes it exponentially more difficult to determine where your funds originated.</li> \
 <li>This mixing process happens in the background without any intervention on your part. When you wish to make a transaction, \
-your funds will already be anonymized. No additional waiting is required.</li> \
+your funds will already be mixed. No additional waiting is required.</li> \
 </ol> <hr>\
 <b>IMPORTANT:</b> Your wallet only contains 1000 of these \"change addresses.\" Every time a mixing event happens, up to 9 of your addresses are used up. \
 This means those 1000 addresses last for about 100 mixing events. When 900 of them are used, your wallet must create more addresses. \
 It can only do this, however, if you have automatic backups enabled.<br> \
 Consequently, users who have backups disabled will also have PrivateSend disabled. <hr>\
-For more info see <a href=\"https://stone.atlassian.net/wiki/display/DOC/PrivateSend\">https://stone.atlassian.net/wiki/display/DOC/PrivateSend</a> \
-        "));
+For more information, see the <a href=\"https://docs.stone.cx/en/stable/wallets/stonecore/privatesend-instantsend.html\">PrivateSend documentation</a>."
+        ));
         ui->aboutMessage->setWordWrap(true);
         ui->helpMessage->setVisible(false);
-        ui->aboutLogo->setVisible(false);
     }
-    // Theme dependent Gfx in About popup
-    QString helpMessageGfx = ":/images/" + GUIUtil::getThemeName() + "/about";
-    QPixmap pixmap = QPixmap(helpMessageGfx);
-    ui->aboutLogo->setPixmap(pixmap);
 }
 
 HelpMessageDialog::~HelpMessageDialog()
@@ -202,29 +200,32 @@ void HelpMessageDialog::on_okButton_accepted()
 ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
     QWidget(parent, f)
 {
+    setObjectName("ShutdownWindow");
+
+    /* Open CSS when configured */
+    this->setStyleSheet(GUIUtil::loadStyleSheet());
+
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(new QLabel(
-        tr("Stone Core is shutting down...") + "<br /><br />" +
+        tr("%1 is shutting down...").arg(tr(PACKAGE_NAME)) + "<br /><br />" +
         tr("Do not shut down the computer until this window disappears.")));
     setLayout(layout);
 }
 
-void ShutdownWindow::showShutdownWindow(BitcoinGUI *window)
+QWidget *ShutdownWindow::showShutdownWindow(BitcoinGUI *window)
 {
     if (!window)
-        return;
+        return nullptr;
 
     // Show a simple window indicating shutdown status
     QWidget *shutdownWindow = new ShutdownWindow();
-    // We don't hold a direct pointer to the shutdown window after creation, so use
-    // Qt::WA_DeleteOnClose to make sure that the window will be deleted eventually.
-    shutdownWindow->setAttribute(Qt::WA_DeleteOnClose);
     shutdownWindow->setWindowTitle(window->windowTitle());
 
     // Center shutdown window at where main window was
     const QPoint global = window->mapToGlobal(window->rect().center());
     shutdownWindow->move(global.x() - shutdownWindow->width() / 2, global.y() - shutdownWindow->height() / 2);
     shutdownWindow->show();
+    return shutdownWindow;
 }
 
 void ShutdownWindow::closeEvent(QCloseEvent *event)

@@ -1,19 +1,21 @@
-Stone Core 2.1.1
+Stone Core
 ===============================
 
-`master:` [![Build Status](https://travis-ci.org/stone/stone.svg?branch=master)](https://travis-ci.org/stone/stone)
+* Website: https://stone.cx/
+* Explorer: http://explorer.stone.cx
+* Discord: https://discordapp.com/invite/w5nVprh
 
-https://stone.zone
-
-
-What is STONE?
+What is Stone?
 ----------------
 
-STONE is a fully decentralised cryptocurrency built on the premise of providing anonymity, speed, fair mining by being ASIC-resistant and reliability by the usage of Masternodes.
+Stone is an experimental new digital currency that enables anonymous, instant
+payments to anyone, anywhere in the world. Stone uses peer-to-peer technology
+to operate with no central authority: managing transactions and issuing money
+are carried out collectively by the network. Stone Core is the name of the open
+source software which enables the use of this currency.
 
-
-For more information, as well as an immediately usable, binary version of
-the Stone Core software, see https://stone.zone
+For more information, as well as an immediately useable, binary version of
+the Stone Core software, see https://stone.cx/.
 
 
 License
@@ -26,7 +28,7 @@ Development Process
 -------------------
 
 The `master` branch is meant to be stable. Development is normally done in separate branches.
-[Tags](https://github.com/stoneproject/stone/tags) are created to indicate new official,
+[Tags](https://github.com/stone-project/stone/tags) are created to indicate new official,
 stable release versions of Stone Core.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -58,4 +60,3 @@ Changes should be tested by somebody other than the developer who wrote the
 code. This is especially important for large or high-risk changes. It is useful
 to add a test plan to the pull request description if testing the changes is
 not straightforward.
-

@@ -13,7 +13,7 @@
 - (NSString *)__bundleIdentifier
 {
     if (self == [NSBundle mainBundle]) {
-        return @"org.stone.Stone-Qt";
+        return @"org.stone.stone-Qt";
     } else {
         return [self __bundleIdentifier];
     }
