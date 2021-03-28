@@ -232,23 +232,23 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nSubsidyHalvingInterval = 518400;
-        consensus.nMasternodePaymentsStartBlock = 780;
+        consensus.nSubsidyHalvingInterval = 262800; // one year
+        consensus.nMasternodePaymentsStartBlock = 1500000;
         consensus.nMasternodePaymentsIncreaseBlock = 100001;
         consensus.nMasternodePaymentsIncreasePeriod = 100001;
         consensus.nInstantSendConfirmationsRequired = 6;
         consensus.nInstantSendKeepLock = 24;
-        consensus.nBudgetPaymentsStartBlock = 480000;
-        consensus.nBudgetPaymentsCycleBlocks = 21600; // 720*30=21600 1 super block per month.
+        consensus.nBudgetPaymentsStartBlock = 92000;
+        consensus.nBudgetPaymentsCycleBlocks = 16616; // 720*30=21600 1 super block per month.
         consensus.nBudgetPaymentsWindowBlocks = 100;
-        consensus.nSuperblockStartBlock = 481000;
+        consensus.nSuperblockStartBlock = 1510000;
         consensus.nSuperblockStartHash = uint256S("0x00");
         consensus.nSuperblockCycle = 21600; // 720*30=21600 1 super block per month.
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
         consensus.nMasternodeMinimumConfirmations = 15;
-        consensus.BIP34Height = 1;
-        consensus.BIP34Hash = uint256S("0x000005c44e04128d9953a742860dbe3c10fb527a3605462cb6bd3e36dd6a285a");
+        consensus.BIP34Height = 92000;
+        consensus.BIP34Hash = uint256S("0x00000001d76d0aec1deaa4ec32405ed03e8a025307a0da9b60d18d3b0f7ef9db");
         consensus.BIP65Height = 42000;
         consensus.BIP66Height = 42500;
         consensus.DIP0001Height = 16128;
@@ -270,8 +270,8 @@ public:
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1555135200; // Apr 13th, 2019 06:00AM
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1586757600; // Apr 13th, 2020 06:00AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1502280000; // Apr 13th, 2019 06:00AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1533816000; // Apr 13th, 2020 06:00AM
 
         // Deployment of DIP0001
         consensus.vDeployments[Consensus::DEPLOYMENT_DIP0001].bit = 1;
@@ -312,33 +312,33 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0xcf; //Stone
-        pchMessageStart[1] = 0x4e;
-        pchMessageStart[2] = 0x3b;
-        pchMessageStart[3] = 0x49;
-        nDefaultPort = 43649;
+        pchMessageStart[0] = 0xbf; // Stone
+        pchMessageStart[1] = 0xc4;
+        pchMessageStart[2] = 0x6b;
+        pchMessageStart[3] = 0x4a;
+        nDefaultPort = 22323;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1551279600, 2084647557, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1516563600, 147795, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0000038977617c01646209e33e354174ef916df8284346b29aecfbc98fa43dd0"));
-        assert(genesis.hashMerkleRoot == uint256S("93113cc5a2df97b20bbe91731578c6722080355be0b4b83b60c6b9ac535d5d15"));
+        assert(consensus.hashGenesisBlock == uint256S("00000e8a8fcdc02729b7019097b5d85334698078899ef6d9c791f3995c0e474d"));
+        assert(genesis.hashMerkleRoot == uint256S("f5d78571b59baf4e0107d7d4f7ca56b62bf68d944ae50bbee00fd8bf0317ba98"));
 
-        vSeeds.emplace_back("161.43.201.255", true);
-        vSeeds.emplace_back("164.68.76.122", true);
-        vSeeds.emplace_back("192.99.55.111", true);
-        vSeeds.emplace_back("45.77.125.15", true);
-        vSeeds.emplace_back("167.99.75.36", true);
-        vSeeds.emplace_back("206.189.34.157", true);
-        vSeeds.emplace_back("178.128.96.216", true);
-        vSeeds.emplace_back("167.71.220.78", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
+        //vSeeds.emplace_back("", true);
 
-        // Stone addresses start with 'G'
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,38);
-        // Stone script addresses start with '6'
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,13);
-        // Stone private keys start with 't'
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,127);
+        // Stone addresses start with 'P'
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,63);
+        // Stone script addresses start with '7'
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,18);
+        // Stone private keys start with '7' or 'P'
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,191);
         // Stone BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
         // Stone BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
@@ -373,15 +373,15 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                {348942, uint256S("0x000000003dd8b5ef4504a6cac5d153452b505028eaa735b35ec11177c096885c")},
+                {401300, uint256S("0x000000004bf83b1b0befbe53d5c1f474bf9fae4412e0298d7ab0df55cfb355e2")},
             }
         };
 
         chainTxData = ChainTxData{
-            1561717114, // * UNIX timestamp of last known number of transactions (Block 1173619)
-            200000,   // * total number of transactions between genesis and that timestamp
+            1568678300, // * UNIX timestamp of last known number of transactions (Block 1173619)
+            476168,   // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
-            0.2         // * estimated number of transactions per second after that timestamp
+            720         // * estimated number of transactions per second after that timestamp
         };
     }
 };
