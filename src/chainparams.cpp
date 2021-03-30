@@ -255,10 +255,10 @@ public:
         consensus.DIP0003Height = 445000;
         consensus.DIP0003EnforcementHeight = 450000;
         consensus.DIP0003EnforcementHash = uint256S("0x000000001267505023dcc5c9d4920c045b1291fb4d1bca97c839653f3731cc0e");
-        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
-        consensus.nPowTargetTimespan = 1 * 60; // Stone: 1 hour
+        consensus.powLimit = uint256S("00000fffff000000000000000000000000000000000000000000000000000000"); // ~uint256(0) >> 20
+        consensus.nPowTargetTimespan = 60 * 60; // Stone: 1 hour
         consensus.nPowTargetSpacing = 2 * 60; // Stone: 2 minutes
-        consensus.fPowAllowMinDifficultyBlocks = false;
+        consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
 //        consensus.nPowKGWHeight = 9999999999;
 //        consensus.nPowDGWHeight = 1000;
