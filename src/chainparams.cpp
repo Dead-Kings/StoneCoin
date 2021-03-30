@@ -367,8 +367,8 @@ public:
         nPoolMaxParticipants = 5;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
-        vSporkAddresses = {"GPtvomLwsEwjp7KaFHsU4BLcKLsc9155D3", "GW9NQGHV9MYiWBkjAraiqPjak5fSBSN1nz"}; // FS350 TKMS
-        nMinSporkKeys = 2;
+        vSporkAddresses = {"SPipuXWfas44sp2UWMWgpPSc484u8oGtEP"}; // Deadkings
+        nMinSporkKeys = 1;
         fBIP9CheckMasternodesUpgraded = true;
 
         checkpointData = (CCheckpointData) {
@@ -505,8 +505,8 @@ public:
 */
         genesis = CreateGenesisBlock(1551279600, 2084647557, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0000038977617c01646209e33e354174ef916df8284346b29aecfbc98fa43dd0"));
-        assert(genesis.hashMerkleRoot == uint256S("93113cc5a2df97b20bbe91731578c6722080355be0b4b83b60c6b9ac535d5d15"));
+        assert(consensus.hashGenesisBlock == uint256S("00000909ce102cdce8a41ef0947bcb4f66325632a45991336d0e7a17515167ec"));
+        assert(genesis.hashMerkleRoot == uint256S("f5d78571b59baf4e0107d7d4f7ca56b62bf68d944ae50bbee00fd8bf0317ba98"));
 
         vFixedSeeds.clear();
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_test, pnSeed6_test + ARRAYLEN(pnSeed6_test));
@@ -657,8 +657,8 @@ public:
 
         genesis = CreateGenesisBlock(1590304529, 2085344586, 0x207fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("000005630aad8470b8394349d60f90711ebb57939659da34951c438b7e7765fa"));
-        assert(genesis.hashMerkleRoot == uint256S("1e20f03a492282a0b75cdbe2ea52944e11c9a425cb149c44e561aa2aae33a347"));
+        // assert(consensus.hashGenesisBlock == uint256S("5a2bd287d108e8ae36227683cc9f47c4ed4b93a19b29684dec3b1a7189248eb4"));
+        // assert(genesis.hashMerkleRoot == uint256S("33a98e8f8089165dc24358b01d52dd740011bdbffad052d51d3ac3588af2f487"));
 
         devnetGenesis = FindDevNetGenesisBlock(consensus, genesis, 50 * COIN);
         consensus.hashDevnetGenesisBlock = devnetGenesis.GetHash();
